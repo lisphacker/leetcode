@@ -24,7 +24,6 @@ class Solution:
                 else:
                     k -= 1
 
-        print(triplets)
         return [[x, y, z] for (x, y, z) in triplets]
 
 import unittest
