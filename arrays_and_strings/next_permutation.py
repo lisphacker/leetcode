@@ -1,25 +1,7 @@
 from typing import List
+from functools import reduce
 
 class Solution:
-    def swap(self, nums: List[int], i: int, j: int) -> None:
-        t = nums[i]
-        nums[i] = nums[j]
-        nums[j] = t
-
-    def rec(self, nums: List[int], i: int) -> None:
-        if i < 0:
-            last = nums[-1]
-            for j in range(len(nums) - 1, 0, -1):
-                nums[j] = nums[j - 1]
-            nums[0] = last
-            return
-
-        if nums[i] < nums[i + 1]:
-            self.swap(nums, i, i + 1)
-        else:
-            self.swap(nums, i, i + 1)
-            self.rec(nums, i - 1)
-
     def nextPermutation(self, nums: List[int]) -> None:
         """
         Do not return anything, modify nums in-place instead.
@@ -27,16 +9,37 @@ class Solution:
         if len(nums) < 2:
             return
 
-        i = len(nums) - 2
+        i = len(nums) - 1
 
-        self.rec(nums, i)
+        while True:
+            i -= 1
+            if i < 0:
+                nums.sort()
+                return
+            thisv = nums[i]
+            bigger_exists = reduce(lambda r, x: r or (x > thisv), nums[i + 1:], False)
+            if bigger_exists:
+                subset = sorted(nums[i + 1:])
+                nextv = None
+                for j, v in enumerate(subset):
+                    if v > thisv:
+                        nextv = v
+                        break
+
+                subset[j] = thisv
+                nums[i] = nextv
+                nums[i + 1:] = sorted(subset)
+                return
+            else:
+                pass
+
 
 import unittest
 
 class Tests(unittest.TestCase):
     def compare(self, input, ref_output):
-        print('Input:', input)
-        print('Ref output:', ref_output)
+        # print('Input:', input)
+        # print('Ref output:', ref_output)
         Solution().nextPermutation(input)
         self.assertListEqual(ref_output, input)
 
