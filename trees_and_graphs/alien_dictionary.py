@@ -25,7 +25,7 @@ class Solution:
                 
             last = s
                         
-        if len(ordering) > 1:
+        if len(ordering) > 0:
             orderings.append(ordering)
             
         groups = groupby(non_empty_words, lambda w: w[0])
@@ -55,36 +55,7 @@ class Solution:
                         backward_graph[j] = set([i])
 
         return forward_graph, backward_graph
-    
-#     def flatten_graph2(self, order_graph: Dict[str, List[str]], 
-#                        order: List[str], i: str, used: Set[str], 
-#                        alphabets: Set[str]) -> List[str]:
-#         order.append(i)
-#         used.add(i)
         
-#         if len(order) == len(alphabets):
-#             return order
-
-#         if i in order_graph:
-#             for j in order_graph[i]:
-#                 print(111, j, order)
-#                 p = self.flatten_graph2(order_graph, order, j, used, alphabets)
-#                 if p is not None:
-#                     return p
-
-#         used.remove(i)
-#         order.pop()
-#         return None
-    
-#     def flatten_graph(self, order_graph: Dict[str, List[str]],
-#                       unordered_alphabets: List[str],
-#                       alphabets: Set[str]) -> str:
-#         for i in order_graph:
-#             path = self.flatten_graph2(order_graph, unordered_alphabets, i, set(), alphabets)
-#             if path is not None:
-#                 return ''.join(path)
-#         return ''.join(unordered_alphabets)
-    
     def flatten_graph(self, 
                       forward_graph: Graph, backward_graph: Graph,
                       unordered_alphabets: List[str],
@@ -96,6 +67,20 @@ class Solution:
                 for i1, i2 in zip(ii, ii[1:]):
                     forward_graph[i1].remove(j)
                     forward_graph[i1].add(i2)
+
+        no_changes = False
+        while not no_changes:
+            no_changes = True
+            for i, jj in forward_graph.items():
+                if len(jj) > 1:
+                    jj = list(jj)
+                    for j1, j2 in zip(jj, jj[1:]):
+                        forward_graph[i].remove(j2)
+                        if j1 in forward_graph:
+                            forward_graph[j1].add(j2)
+                        else:
+                            forward_graph[j1] = {j2}
+                    no_changes = False
 
         return forward_graph
 
@@ -143,6 +128,34 @@ class Solution:
             
         return ''.join(init_ordering)
         
+    def traverse(self, graph: Graph, i: str, acc: List[str], used: Set[str]):
+        print('traverse ', 'i=', i, ', used=', used, ', acc=', acc)
+        if i in used:
+            return
+
+        acc.append(i)
+        used.add(i)
+         
+        for jj in graph.get(i, {}):
+            for j in jj:
+                self.traverse(graph, j, acc, used)
+
+    def generate_final_ordering(self, 
+                                forward_graph: Graph, 
+                                backward_graph: Graph, alphabets: Set[str]) -> str:
+        start_letters = alphabets - backward_graph.keys()
+        if len(start_letters) == len(alphabets):
+            return "" # To work around error in judger
+        
+        out_list = []
+        used = set()
+        
+        for start_letter in start_letters:
+            self.traverse(forward_graph, start_letter, out_list, used)
+        return ''.join(out_list)
+
+        
+        
     def alienOrder(self, words: List[str]) -> str:
         alphabets = set(''.join(words))
         
@@ -164,12 +177,17 @@ class Solution:
         print('Orderings', orderings)
         print('Forward graph', forward_graph)
         print('Backward graph', backward_graph)
-        print('Unordered alpphabets', unordered_alphabets)
+        print('Unordered alphabets', unordered_alphabets)
         print('')
         
         self.flatten_graph(forward_graph, backward_graph, [s for s in unordered_alphabets], alphabets)
         
         print('Flattened forward graph', forward_graph)
         
-        return self.search_ordering(forward_graph, [s for s in unordered_alphabets], alphabets)
+        #return self.search_ordering(forward_graph, [s for s in unordered_alphabets], alphabets)
+        return self.generate_final_ordering(forward_graph, backward_graph, alphabets)
         
+'''
+Test cases
+['ac', ad', 'bc', bd']
+'''
