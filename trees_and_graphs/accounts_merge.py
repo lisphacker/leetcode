@@ -61,7 +61,7 @@ class Solution:
 
         ret = []
         for acc in id2a.values():
-            ret.append([acc.name] + list(acc.emails))
+            ret.append([acc.name] + sorted(list(acc.emails)))
 
         return ret
 
