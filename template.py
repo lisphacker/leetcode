@@ -10,7 +10,7 @@ def log(o, label=None, *args, **kwargs):
             pprint(o)
             print()
         else:
-            print(*args, **kwargs)
+            print(o, *args, **kwargs)
 
 class Solution:
     def apply(self, input):
