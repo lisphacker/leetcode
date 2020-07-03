@@ -13,7 +13,7 @@ def log(o, label=None, *args, **kwargs):
             print(o, *args, **kwargs)
 
 class Solution:
-    def check_node(self, graph, partitions, visited, i):
+    def check_node(self, graph, visited, i):
         if i not in visited:
             return False
 
@@ -25,40 +25,26 @@ class Solution:
 
         return True
 
-    def add_node(self, graph, partitions, visited, i):
+    def add_node(self, graph, visited, i, p, otherp):
         if i in visited:
-            return self.check_node(graph, partitions, visited, i)
+            return self.check_node(graph, visited, i)
 
         added = False
-        for p in range(len(partitions)):
-            visited[i] = p
-            partitions[p].add(i)
+        visited[i] = p
 
-            failed = False
-            for j in graph[i]:
-                if not self.add_node(graph, partitions, visited, j):
-                    failed = True
-                if failed:
-                    break
+        for j in graph[i]:
+            if not self.add_node(graph, visited, j, otherp, p):
+                return False
 
-            del visited[i]
-            partitions[p].remove(i)
-
-            if failed:
-                continue
-
-            added = True
-
-        return added
+        return True
 
     def isBipartite(self, graph_data: List[List[int]]) -> bool:
         graph = {i:set(jj) for i, jj in enumerate(graph_data)}
 
-        partitions = [set(), set()]
         visited = dict()
 
         for i in graph:
-            if not self.add_node(graph, partitions, visited, i):
+            if not self.add_node(graph, visited, i, 0, 1):
                 return False
 
         return True
