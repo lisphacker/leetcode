@@ -4,6 +4,12 @@ from typing import List, Dict, Set, Tuple
 Graph = Dict[str, Set[str]]
 Ordering = List[str]
 
+DEBUG = False
+def log(*args, **kwargs):
+    global DEBUG
+    if DEBUG:
+        print(*args, **kwargs)
+        
 class Solution:
     def compute_orderings(self, words: List[str], orderings: List[Ordering]):
         ordering = []
@@ -71,7 +77,9 @@ class Solution:
         no_changes = False
         while not no_changes:
             no_changes = True
-            for i, jj in forward_graph.items():
+            keys = set(forward_graph.keys())
+            for i in keys:
+                jj = forward_graph[i]
                 if len(jj) > 1:
                     jj = list(jj)
                     for j1, j2 in zip(jj, jj[1:]):
@@ -84,52 +92,8 @@ class Solution:
 
         return forward_graph
 
-    def search_ordering_rec(self, 
-                            forward_graph: Graph,
-                            a: str,
-                            ordering: Ordering, 
-                            used: Set[str], 
-                            alphabets: List[str]) -> Ordering:
-        if a in used:
-            return None
-        
-        ordering.append(a)
-        used.add(a)
-        
-        if len(ordering) == len(alphabets):
-            for b in forward_graph.get(a, set()):
-                # print(a, b, used)
-                if b in used:
-                    used.remove(a)
-                    ordering.pop()
-                    return None
-            return ordering
-        
-        if a in forward_graph:
-            for bs in forward_graph[a]:
-                for b in bs:
-                    o = self.search_ordering_rec(forward_graph, b, ordering, used, alphabets)
-                    if o is not None:
-                        return o
-        used.remove(a)
-        ordering.pop()
-        
-        return None
-    
-    def search_ordering(self,
-                        forward_graph: Graph, 
-                        unordered_alphabets: List[str], 
-                        alphabets: List[str]) -> str:
-        init_ordering = [a for a in unordered_alphabets]
-        for a in forward_graph:
-            ordering = self.search_ordering_rec(forward_graph, a, init_ordering, set(), alphabets)
-            if ordering is not None:
-                return ''.join(ordering)
-            
-        return ''.join(init_ordering)
-        
     def traverse(self, graph: Graph, i: str, acc: List[str], used: Set[str]):
-        print('traverse ', 'i=', i, ', used=', used, ', acc=', acc)
+        # print('traverse ', 'i=', i, ', used=', used, ', acc=', acc)
         if i in used:
             return
 
@@ -144,8 +108,8 @@ class Solution:
                                 forward_graph: Graph, 
                                 backward_graph: Graph, alphabets: Set[str]) -> str:
         start_letters = alphabets - backward_graph.keys()
-        if len(start_letters) == len(alphabets):
-            return "" # To work around error in judger
+#         if len(start_letters) == len(alphabets):
+#             return "" # To work around error in judger
         
         out_list = []
         used = set()
@@ -159,12 +123,14 @@ class Solution:
     def alienOrder(self, words: List[str]) -> str:
         alphabets = set(''.join(words))
         
+        log('Computing orderings')
         orderings = []
         try:
             self.compute_orderings(words, orderings)
         except:
             return ''
 
+        log('Computing dependency graph')
         forward_graph, backward_graph = self.compute_graph(orderings)
         
         ordered_alphabets = set()
@@ -174,19 +140,21 @@ class Solution:
                 ordered_alphabets.add(j)
         unordered_alphabets = alphabets - ordered_alphabets
         
-        print('Orderings', orderings)
-        print('Forward graph', forward_graph)
-        print('Backward graph', backward_graph)
-        print('Unordered alphabets', unordered_alphabets)
-        print('')
+        log('Orderings', orderings)
+        log('Forward graph', forward_graph)
+        log('Backward graph', backward_graph)
+        log('Unordered alphabets', unordered_alphabets)
+        log('')
         
+        log('Flattening graph')
         self.flatten_graph(forward_graph, backward_graph, [s for s in unordered_alphabets], alphabets)
         
-        print('Flattened forward graph', forward_graph)
+        log('Flattened forward graph', forward_graph)
         
-        #return self.search_ordering(forward_graph, [s for s in unordered_alphabets], alphabets)
+        log('Computing final ordering')
         return self.generate_final_ordering(forward_graph, backward_graph, alphabets)
-        
+     
+DEBUG = False
 '''
 Test cases
 ['ac', ad', 'bc', bd']

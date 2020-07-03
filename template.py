@@ -1,4 +1,16 @@
 from typing import List
+from pprint import pprint
+
+DEBUG = False
+
+def log(o, label=None, *args, **kwargs):
+    if DEBUG:
+        if label is not None:
+            print(label)
+            pprint(o)
+            print()
+        else:
+            print(*args, **kwargs)
 
 class Solution:
     def apply(self, input):
