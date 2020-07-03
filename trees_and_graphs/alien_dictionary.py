@@ -12,25 +12,35 @@ def log(*args, **kwargs):
         
 class Solution:
     def compute_orderings(self, words: List[str], orderings: List[Ordering]):
+        log('Compute orderings for', words)
         ordering = []
         seen = set()
         last = None
         non_empty_words = []
+        found_non_empty = False
         for word in words:
+            log(111, word, found_non_empty)
             if len(word) == 0:
+                if found_non_empty:
+                    raise Exception('Invalid ordering')
                 continue
+                
+            found_non_empty = True
+            
             non_empty_words.append(word)
             s = word[0]
             if s != last:
                 if s in seen:
-                    print(words, word, s, seen)
+                    log(words, word, s, seen)
                     raise Exception('Invalid ordering')
                 else:
                     ordering.append(s)
                     seen.add(s)
                 
             last = s
-                        
+
+        log('Ordering', ordering)
+
         if len(ordering) > 0:
             orderings.append(ordering)
             
@@ -62,17 +72,16 @@ class Solution:
 
         return forward_graph, backward_graph
         
+    def add_edge(self, graph, i, j):
+        if i in graph:
+            graph[i].add(j)
+        else:
+            graph[i] = {j}
+
     def flatten_graph(self, 
                       forward_graph: Graph, backward_graph: Graph,
                       unordered_alphabets: List[str],
                       alphabets: Set[str]) -> str:
-
-        for j, ii in backward_graph.items():
-            if len(ii) > 1:
-                ii = list(ii)
-                for i1, i2 in zip(ii, ii[1:]):
-                    forward_graph[i1].remove(j)
-                    forward_graph[i1].add(i2)
 
         no_changes = False
         while not no_changes:
@@ -84,13 +93,28 @@ class Solution:
                     jj = list(jj)
                     for j1, j2 in zip(jj, jj[1:]):
                         forward_graph[i].remove(j2)
-                        if j1 in forward_graph:
-                            forward_graph[j1].add(j2)
-                        else:
-                            forward_graph[j1] = {j2}
+                        self.add_edge(forward_graph, j1, j2)
+
+                        backward_graph[j2].remove(i)
+                        self.add_edge(backward_graph, j2, j1)
                     no_changes = False
 
-        return forward_graph
+        no_changes = False
+        while not no_changes:
+            no_changes = True
+            keys = set(backward_graph.keys())
+            for j in keys:
+                ii = backward_graph[j]
+                if len(ii) > 1:
+                    ii = list(ii)
+                    for i1, i2 in zip(ii, ii[1:]):
+                        forward_graph[i1].remove(j)
+                        self.add_edge(forward_graph, i1, i2)
+
+                        backward_graph[j].remove(i1)
+                        self.add_edge(backward_graph, i2, i1)
+
+                    no_changes = False
 
     def traverse(self, graph: Graph, i: str, acc: List[str], used: Set[str]):
         # print('traverse ', 'i=', i, ', used=', used, ', acc=', acc)
@@ -155,7 +179,11 @@ class Solution:
         return self.generate_final_ordering(forward_graph, backward_graph, alphabets)
      
 DEBUG = False
+
 '''
 Test cases
-['ac', ad', 'bc', bd']
+["wrt","wrf","er","ett","rftt"]
+["ac", "ad", "bc", "bd"]
+["abc","ab"]
+["a","b","ca","cc"]
 '''
