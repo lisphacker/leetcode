@@ -1,0 +1,75 @@
+from typing import List
+from pprint import pprint
+
+DEBUG = False
+
+def log(o, label=None, *args, **kwargs):
+    if DEBUG:
+        if label is not None:
+            print(label)
+            pprint(o)
+            print()
+        else:
+            print(o, *args, **kwargs)
+
+class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+        if len(s) == 0 and len(p) == 0:
+            return True
+
+        if len(s) == 0 or len(p) == 0:
+            return False
+        
+        s0 = s[0]
+        p0 = p[0]
+        star = False if len(p) == 1 else (p[1] == '*')
+        
+        if not star:
+            if p0 == '.':
+                return self.isMatch(s[1:], p[1:])
+            else:
+                if s0 == p0:
+                    return self.isMatch(s[1:], p[1:])
+                else:
+                    return False
+        else:
+            if p0 == '.':
+                sr = s
+                while len(sr) != 0:
+                    if self.isMatch(sr, p[2:]):
+                        return True
+                    sr = sr[1:]
+                return False
+            else:
+                sr = s
+                while len(sr) != 0 and sr[0] == p0:
+                    if self.isMatch(sr, p[2:]):
+                        return True
+                    sr = sr[1:]
+                return False
+        return False
+
+
+import unittest
+
+class Tests(unittest.TestCase):
+    def compare(self, input1,  input2, ref_output):
+        self.assertEqual(ref_output, Solution().isMatch(input1, input2))
+
+    def test_1(self):
+        self.compare('aa', 'a', False)
+
+    def test_2(self):
+        self.compare('aa', 'a*', True)
+
+    def test_3(self):
+        self.compare('ab', '.*', True)
+
+    def test_4(self):
+        self.compare('aab', 'c*a*b*', True)
+
+    def test_5(self):
+        self.compare('mississippi', 'mis*is*p*.', False)
+
+if __name__ == '__main__':
+    unittest.main()
