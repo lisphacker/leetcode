@@ -35,9 +35,9 @@ class Solution:
             if p[0] == '.':
                 if len(s) > 0 and self.isMatch(s[1:], p):
                     return True
-                elif self.isMatch(s, p[2:]):
-                    return True
                 elif len(s) > 0 and self.isMatch(s[1:], p[2:]):
+                    return True
+                elif self.isMatch(s, p[2:]):
                     return True
                 else:
                     return False
@@ -47,6 +47,8 @@ class Solution:
                         if self.isMatch(s[1:], p):
                             return True
                         elif self.isMatch(s[1:], p[2:]):
+                            return True
+                        elif self.isMatch(s, p[2:]):
                             return True
                         else:
                             return False
@@ -91,6 +93,15 @@ class Tests(unittest.TestCase):
 
     def test_7(self):
         self.compare('bbbba', '.*a*a', True)
+
+    def test_8(self):
+        n = 5
+        input = 'a' * n + 'b'
+        output = 'a*' * n + 'c'
+        self.compare(input, output, False)
+
+    def test_9(self):
+        self.compare('aaaaaaaaaaaaab', 'a*a*a*a*a*a*a*a*a*a*c', False)
 
 if __name__ == '__main__':
     unittest.main()
