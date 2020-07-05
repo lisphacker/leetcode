@@ -35,21 +35,39 @@ class Solution:
         else:
             if p0 == '.':
                 sr = s
-                while len(sr) != 0:
-                    if self.isMatch(sr, p[2:]):
+                while True:
+                    if self.isMatch(sr[1:], p):
+                        return True
+                    elif self.isMatch(sr, p[2:]):
+                        return True
+                    elif self.isMatch(sr[1:], p[2:]):
                         return True
                     sr = sr[1:]
+                    if len(sr) == 0:
+                        break
                 return False
             else:
                 sr = s
-                while len(sr) != 0 and sr[0] == p0:
-                    if self.isMatch(sr, p[2:]):
-                        return True
+                while True:
+                    if sr[0] == p0:
+                        if self.isMatch(sr[1:], p):
+                            return True
+                        elif self.isMatch(sr[1:], p[2:]):
+                            return True
+                    else:
+                        if self.isMatch(sr, p[2:]):
+                            return True
+                        else:
+                            return False
+
                     sr = sr[1:]
+                    if len(sr) == 0:
+                        break
+
                 return False
         return False
 
-
+stest = 'ippi'
 import unittest
 
 class Tests(unittest.TestCase):
@@ -70,6 +88,9 @@ class Tests(unittest.TestCase):
 
     def test_5(self):
         self.compare('mississippi', 'mis*is*p*.', False)
+
+    def test_6(self):
+        self.compare('a', 'ab*.', True)
 
 if __name__ == '__main__':
     unittest.main()
