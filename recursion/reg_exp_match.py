@@ -14,60 +14,57 @@ def log(o, label=None, *args, **kwargs):
 
 class Solution:
     def isMatch(self, s: str, p: str) -> bool:
+        log(f'isMatch({s}, {p})')
+
         if len(s) == 0 and len(p) == 0:
             return True
 
-        if len(s) == 0 or len(p) == 0:
-            return False
-        
-        s0 = s[0]
-        p0 = p[0]
-        star = False if len(p) == 1 else (p[1] == '*')
+        star = False if len(p) < 2 else (p[1] == '*')
         
         if not star:
-            if p0 == '.':
+            if len(p) == 0 or len(s) == 0:
+                return False
+            if p[0] == '.':
                 return self.isMatch(s[1:], p[1:])
             else:
-                if s0 == p0:
+                if s[0] == p[0]:
                     return self.isMatch(s[1:], p[1:])
                 else:
                     return False
         else:
-            if p0 == '.':
-                sr = s
-                while True:
-                    if self.isMatch(sr[1:], p):
-                        return True
-                    elif self.isMatch(sr, p[2:]):
-                        return True
-                    elif self.isMatch(sr[1:], p[2:]):
-                        return True
-                    sr = sr[1:]
-                    if len(sr) == 0:
-                        break
-                return False
+            if p[0] == '.':
+                if len(s) > 0 and self.isMatch(s[1:], p):
+                    return True
+                elif self.isMatch(s, p[2:]):
+                    return True
+                elif len(s) > 0 and self.isMatch(s[1:], p[2:]):
+                    return True
+                else:
+                    return False
             else:
-                sr = s
-                while True:
-                    if sr[0] == p0:
-                        if self.isMatch(sr[1:], p):
+                if len(s) > 0:
+                    if s[0] == p[0]:
+                        if self.isMatch(s[1:], p):
                             return True
-                        elif self.isMatch(sr[1:], p[2:]):
-                            return True
-                    else:
-                        if self.isMatch(sr, p[2:]):
+                        elif self.isMatch(s[1:], p[2:]):
                             return True
                         else:
                             return False
+                    else:
+                        if self.isMatch(s, p[2:]):
+                            return True
+                        else:
+                            return False
+                else:
+                    if self.isMatch(s, p[2:]):
+                        return True
+                    else:
+                        return False
 
-                    sr = sr[1:]
-                    if len(sr) == 0:
-                        break
-
-                return False
         return False
 
-stest = 'ippi'
+DEBUG = True
+
 import unittest
 
 class Tests(unittest.TestCase):
@@ -90,7 +87,10 @@ class Tests(unittest.TestCase):
         self.compare('mississippi', 'mis*is*p*.', False)
 
     def test_6(self):
-        self.compare('a', 'ab*.', True)
+        self.compare('a', 'ab*', True)
+
+    def test_7(self):
+        self.compare('bbbba', '.*a*a', True)
 
 if __name__ == '__main__':
     unittest.main()
