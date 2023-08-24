@@ -3,3 +3,4 @@
 1. [Two Sum](https://leetcode.com/problems/two-sum/) - [Problem1.hs](Problem1.hs)
 2. [Longest Substring Without Repeating Characters
    ](https://leetcode.com/problems/longest-substring-without-repeating-characters/) - [Problem3.hs](Problem3.hs)
+3. [Valid Parentheses](https://leetcode.com/problems/valid-parentheses/) -[Problem20.hs](Problem20.hs)
